@@ -2,6 +2,15 @@
 
 ## Upcoming Release
 
+### Changed
+
+- [[#382]](https://github.com/rust-vmm/kvm/pull/382) `VmFd::enable_cap` and the
+  `KVM_ENABLE_CAP` ioctl definition are now available on all architectures
+  instead of only x86_64, s390x and powerpc. aarch64 needs them to enable
+  `KVM_CAP_ARM_WRITABLE_IMP_ID_REGS` (Linux 6.15), without which writes to the
+  implementation ID registers (for example `MIDR_EL1` through a VMM CPU
+  template) fail with EINVAL.
+
 ## v0.25.0
 
 ### Added
