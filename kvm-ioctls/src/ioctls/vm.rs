@@ -1503,26 +1503,21 @@ impl VmFd {
     /// extern crate kvm_bindings;
     ///
     /// # use kvm_ioctls::Kvm;
-    /// use kvm_bindings::{KVM_CAP_SPLIT_IRQCHIP, kvm_enable_cap};
+    /// use kvm_bindings::{KVM_CAP_HALT_POLL, kvm_enable_cap};
     ///
     /// let kvm = Kvm::new().unwrap();
     /// let vm = kvm.create_vm().unwrap();
-    /// let mut cap: kvm_enable_cap = Default::default();
-    /// cap.cap = KVM_CAP_SPLIT_IRQCHIP;
-    /// // As per the KVM documentation, KVM_CAP_SPLIT_IRQCHIP only emulates
-    /// // the local APIC in kernel, expecting that a userspace IOAPIC will
-    /// // be implemented by the VMM.
-    /// // Along with this capability, the user needs to specify the number
-    /// // of pins reserved for the userspace IOAPIC. This number needs to be
-    /// // provided through the first argument of the capability structure, as
-    /// // specified in KVM documentation:
-    /// //     args[0] - number of routes reserved for userspace IOAPICs
-    /// //
-    /// // Because an IOAPIC supports 24 pins, that's the reason why this test
-    /// // picked this number as reference.
-    /// cap.args[0] = 24;
-    /// #[cfg(target_arch = "x86_64")]
-    /// vm.enable_cap(&cap).unwrap();
+    ///
+    /// if kvm.check_extension_raw(KVM_CAP_HALT_POLL.into()) > 0 {
+    ///     let cap = kvm_enable_cap {
+    ///         cap: KVM_CAP_HALT_POLL,
+    ///         // Set the maximum halt-polling time to 100 microseconds.
+    ///         args: [100_000, 0, 0, 0],
+    ///         ..Default::default()
+    ///     };
+    ///
+    ///     vm.enable_cap(&cap).unwrap();
+    /// }
     /// ```
     pub fn enable_cap(&self, cap: &kvm_enable_cap) -> Result<()> {
         // SAFETY: The ioctl is safe because we allocated the struct and we know the
